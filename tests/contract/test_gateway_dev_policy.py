@@ -82,7 +82,7 @@ class GuardedDevelopmentPolicyTests(unittest.TestCase):
         self.assertNotIn("403", retry.get("condition"))
         self.assertEqual(retry.find("forward-request").get("buffer-request-body"), "true")
         self.assertEqual(retry.find("forward-request").get("buffer-response"), "true")
-        self.assertEqual(len(retry.findall("./choose/when/set-backend-service")), 3)
+        self.assertEqual(len(retry.findall("./choose/when/set-backend-service")), 2)
         failed = next(node for node in self.dev_policy.findall("./outbound/choose/when") if "StatusCode >= 500" in node.get("condition", ""))
         self.assertEqual(failed.find("./return-response/set-status").get("code"), "503")
 

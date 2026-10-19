@@ -8,22 +8,22 @@ resource "azurerm_virtual_network" "main" {
   depends_on          = [terraform_data.approval]
 }
 
-resource "azurerm_subnet" "main" {
-  for_each             = local.prerequisites_stage ? { appgw = var.network.app_gateway_subnet } : {}
-  name                 = "${local.prefix}-${each.key}"
-  resource_group_name  = local.rg
-  virtual_network_name = azurerm_virtual_network.main[0].name
-  address_prefixes     = [each.value]
-  service_endpoint {
-    service = "Microsoft.Web"
-  }
-  service_endpoint {
-    service = "Microsoft.Storage"
+resource "azapi_resource" "subnet_main" {
+  for_each  = local.prerequisites_stage ? { appgw = var.network.app_gateway_subnet } : {}
+  type      = "Microsoft.Network/virtualNetworks/subnets@2024-05-01"
+  name      = "${local.prefix}-${each.key}"
+  parent_id = azurerm_virtual_network.main[0].id
+  # Governance denies subnets created without an NSG and non-storage service endpoints.
+  body = {
+    properties = {
+      addressPrefix        = each.value
+      networkSecurityGroup = { id = azurerm_network_security_group.appgw["public"].id }
+    }
   }
 }
 
 resource "azurerm_network_security_group" "appgw" {
-  for_each            = local.edge_stage ? { public = true } : {}
+  for_each            = local.prerequisites_stage ? { public = true } : {}
   name                = "${local.prefix}-appgw-nsg"
   location            = var.location
   resource_group_name = local.rg
@@ -75,9 +75,9 @@ resource "azurerm_network_security_group" "appgw" {
 }
 
 resource "azurerm_subnet_network_security_group_association" "appgw" {
-  for_each                  = local.edge_stage ? { public = true } : {}
-  subnet_id                 = azurerm_subnet.main["appgw"].id
-  network_security_group_id = var.app_gateway_existing_nsg_name == null ? azurerm_network_security_group.appgw[each.key].id : data.azurerm_network_security_group.appgw_platform[0].id
+  for_each                  = local.edge_stage && var.app_gateway_existing_nsg_name != null ? { public = true } : {}
+  subnet_id                 = azapi_resource.subnet_main["appgw"].id
+  network_security_group_id = data.azurerm_network_security_group.appgw_platform[0].id
 }
 
 data "azurerm_network_security_group" "appgw_platform" {

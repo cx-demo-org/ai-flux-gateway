@@ -93,8 +93,7 @@
             }
             if (totalCharacters > 8000) { return true; }
             var model = body["model"];
-            if (model != null &amp;&amp; model.Type == JTokenType.String &amp;&amp; (string)model == "claude-haiku-5-5" &amp;&amp; !messages.Any(m => (string)m["role"] == "user" || (string)m["role"] == "assistant")) { return true; }
-            return model == null || model.Type != JTokenType.String || !((string)model == "gpt-5.6-luna" || (string)model == "gpt-5.6-sol" || (${unified} &amp;&amp; (string)model == "claude-haiku-5-5"));
+            return model == null || model.Type != JTokenType.String || !((string)model == "gpt-5-nano");
           }'>
             <return-response>
               <set-status code="400" reason="Unsupported request shape" />
@@ -209,13 +208,10 @@
           </categories>
         </llm-content-safety>
         <choose>
-          <when condition='@((string)context.Variables["aiflux-model"] == "gpt-5.6-luna")'>
-            <set-backend-service backend-id="dev-gpt-5-6-luna-pool" />
+          <when condition='@((string)context.Variables["aiflux-model"] == "gpt-5-nano")'>
+            <set-backend-service backend-id="dev-gpt-5-nano-pool" />
           </when>
-          <when condition='@((string)context.Variables["aiflux-model"] == "gpt-5.6-sol")'>
-            <set-backend-service backend-id="dev-gpt-5-6-sol-pool" />
-          </when>
-%{ if unified ~}
+%{ if false ~}
           <when condition='@((string)context.Variables["aiflux-model"] == "claude-haiku-5-5")'>
             <set-backend-service backend-id="dev-claude-haiku-5-5-eastus" />
             <rewrite-uri template="/messages" copy-unmatched-params="false" />
@@ -271,13 +267,10 @@
         </when>
       </choose>
       <choose>
-        <when condition='@((string)context.Variables["aiflux-model"] == "gpt-5.6-luna")'>
-          <set-backend-service backend-id="dev-gpt-5-6-luna-pool" />
+        <when condition='@((string)context.Variables["aiflux-model"] == "gpt-5-nano")'>
+          <set-backend-service backend-id="dev-gpt-5-nano-pool" />
         </when>
-        <when condition='@((string)context.Variables["aiflux-model"] == "gpt-5.6-sol")'>
-          <set-backend-service backend-id="dev-gpt-5-6-sol-pool" />
-        </when>
-%{ if unified ~}
+%{ if false ~}
         <when condition='@((string)context.Variables["aiflux-model"] == "claude-haiku-5-5")'>
           <set-backend-service backend-id="dev-claude-haiku-5-5-eastus" />
         </when>
@@ -327,7 +320,7 @@
       </when>
     </choose>
     <choose>
-      <when condition='@(context.Response.StatusCode == 200 &amp;&amp; context.Request.Method == "POST" &amp;&amp; (string)context.Variables["aiflux-model"] == "claude-haiku-5-5")'>
+      <when condition='@(false)'>
         <set-body id="aiflux-anthropic-normalization"><![CDATA[@{
           var response = context.Response.Body.As<JObject>(preserveContent: true);
           var content = response["content"] as JArray;
@@ -454,7 +447,7 @@
           <set-body>{"error":{"message":"Required content safety policy rejected the request or response.","type":"invalid_request_error","param":null,"code":"content_safety_rejected"}}</set-body>
         </return-response>
       </when>
-%{ if unified ~}
+%{ if false ~}
       <when condition='@(context.LastError.PolicyId == "aiflux-anthropic-normalization")'>
         <trace source="aiflux" severity="error">
           <message>Provider response could not be normalized; no answer was released.</message>

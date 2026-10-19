@@ -7,9 +7,7 @@ from aiflux.catalog import Catalog
 
 def test_dev_catalog_keeps_placeholders_uncallable():
     catalog = Catalog.load(Path(__file__).resolve().parents[2] / "gateway/catalog/dev-models.json")
-    assert {m.id for m in catalog.models if m.enabled} == {
-        "gpt-5.6-luna", "gpt-5.6-sol", "claude-haiku-5-5",
-    }
+    assert {m.id for m in catalog.models if m.enabled} == {"gpt-5-nano"}
     assert len([m for m in catalog.models if m.placeholder]) == 6
     assert all(not m.enabled and not m.capabilities for m in catalog.models if m.placeholder)
     assert all(m.max_completion_tokens == 100000 and m.capabilities == ["chat"]
@@ -30,8 +28,8 @@ def test_catalog_api_exposes_preview_without_enabling_it(env):
     response = env.client.get("/api/models", headers=env.customer)
     assert response.status_code == 200
     items = response.json()["items"]
-    assert len(items) == 9
-    assert len([m for m in items if m["enabled"]]) == 3
+    assert len(items) == 7
+    assert len([m for m in items if m["enabled"]]) == 1
     assert len([m for m in items if m["placeholder"] and not m["enabled"]]) == 6
     assert all(m["max_completion_tokens"] == 100000 for m in items if m["enabled"])
 

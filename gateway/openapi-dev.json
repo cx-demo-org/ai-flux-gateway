@@ -41,7 +41,7 @@
                         "properties": {
                           "id": {
                             "type": "string",
-                            "enum": ["gpt-5.6-luna", "gpt-5.6-sol"]
+                            "enum": ["gpt-5-nano"]
                           },
                           "object": {
                             "type": "string",
@@ -85,7 +85,7 @@
                 "properties": {
                   "model": {
                     "type": "string",
-                    "enum": ["gpt-5.6-luna", "gpt-5.6-sol"]
+                    "enum": ["gpt-5-nano"]
                   },
                   "messages": {
                     "type": "array",

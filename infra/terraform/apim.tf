@@ -4,7 +4,7 @@ resource "azurerm_api_management" "main" {
   resource_group_name           = local.rg
   publisher_name                = "Singtel IDS"
   publisher_email               = var.publisher_email
-  sku_name                      = "BasicV2_${var.apim_capacity}"
+  sku_name                      = "${var.apim_sku}_${var.apim_capacity}"
   virtual_network_type          = "None"
   public_network_access_enabled = true
   tags                          = local.tags
@@ -56,16 +56,13 @@ resource "azurerm_api_management_product_api" "blocked" {
 }
 
 locals {
-  model_descriptor = jsondecode(
-    fileexists("${path.module}/../models/model-backends.json") ?
-    file("${path.module}/../models/model-backends.json") :
-    jsonencode({ subscription_id = var.subscription_id, backends = [] })
-  )
-  dev_aliases = toset(["gpt-5.6-luna", "gpt-5.6-sol"])
+  dev_aliases = toset(["gpt-5-nano"])
   dev_model_backends = {
-    for backend in local.model_descriptor.backends :
-    "${backend.alias}-${backend.region}" => backend
-    if backend.ready == true && contains(local.dev_aliases, backend.alias)
+    "gpt-5-nano-${var.location}" = {
+      alias    = "gpt-5-nano"
+      region   = var.location
+      endpoint = "https://${local.prefix}-foundry.openai.azure.com"
+    }
   }
   dev_model_pools = {
     for alias in local.dev_aliases : alias => {
@@ -75,6 +72,14 @@ locals {
       }
     }
   }
+}
+
+data "azapi_resource" "dev_nano" {
+  count                  = var.dev_openai_inference_enabled ? 1 : 0
+  type                   = "Microsoft.CognitiveServices/accounts/deployments@2025-06-01"
+  parent_id              = azapi_resource.ai["language"].id
+  name                   = "gpt-5-nano"
+  response_export_values = ["properties"]
 }
 
 resource "terraform_data" "dev_openai_gate" {
@@ -88,39 +93,11 @@ resource "terraform_data" "dev_openai_gate" {
   lifecycle {
     precondition {
       condition = (
-        local.model_descriptor.subscription_id == var.subscription_id &&
-        length(local.dev_model_backends) == 4 &&
-        alltrue([
-          for backend in values(local.dev_model_backends) :
-          backend.provider == "OpenAI" &&
-          backend.account_resource_id == "/subscriptions/${var.subscription_id}/resourceGroups/${local.rg}/providers/Microsoft.CognitiveServices/accounts/${backend.account_name}" &&
-          backend.deployment_resource_id == "${backend.account_resource_id}/deployments/${backend.deployment_name}" &&
-          backend.endpoint == "https://${backend.account_name}.openai.azure.com" &&
-          backend.deployment_name == backend.alias &&
-          backend.model_name == backend.alias &&
-          backend.endpoint_format == "Azure OpenAI v1" &&
-          backend.native_operation == "POST /openai/v1/chat/completions" &&
-          backend.api_version == "v1 (path; no api-version query required)" &&
-          backend.model_version == "2026-07-09" &&
-          backend.sku == "GlobalStandard" &&
-          backend.capacity == 1 &&
-          backend.provisioning_state == "Succeeded" &&
-          backend.ready == true &&
-          backend.auth.type == "Entra bearer token" &&
-          backend.auth.audience == "https://cognitiveservices.azure.com/" &&
-          backend.auth.gateway_role == "Cognitive Services OpenAI User" &&
-          backend.operator_smoke.http_status == 200 &&
-          backend.operator_smoke.choices_schema_present == true
-        ]) &&
-        alltrue([
-          for alias in local.dev_aliases :
-          length(local.dev_model_pools[alias].backends) == 2 &&
-          toset([for backend in values(local.dev_model_pools[alias].backends) : backend.region]) ==
-          toset(["eastus", "swedencentral"])
-        ]) &&
+        data.azapi_resource.dev_nano[0].output.properties.provisioningState == "Succeeded" &&
+        data.azapi_resource.dev_nano[0].output.properties.model.name == "gpt-5-nano" &&
         var.dev_openai_content_safety_threshold != null
       )
-      error_message = "The guarded API requires verified Luna and Sol OpenAI v1 deployments in East US and Sweden Central, the expected MI audience and role, and an explicitly configured content-safety threshold. No incomplete or substitute backend can be routed."
+      error_message = "The guarded API requires a succeeded gpt-5-nano deployment in the gateway Foundry account and an explicitly configured content-safety threshold."
     }
   }
 }

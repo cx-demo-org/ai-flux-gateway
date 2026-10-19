@@ -26,7 +26,7 @@
                 "additionalProperties": false,
                 "required": ["model", "messages", "max_completion_tokens"],
                 "properties": {
-                  "model": {"type": "string", "enum": ["gpt-5.6-luna", "gpt-5.6-sol", "claude-haiku-5-5"]},
+                  "model": {"type": "string", "enum": ["gpt-5-nano"]},
                   "stream": {"type": "boolean", "enum": [false]},
                   "max_completion_tokens": {"type": "integer", "minimum": 1, "maximum": 100000},
                   "messages": {

@@ -132,7 +132,7 @@ resource "azurerm_application_gateway" "main" {
   }
   gateway_ip_configuration {
     name      = "gateway"
-    subnet_id = azurerm_subnet.main["appgw"].id
+    subnet_id = azapi_resource.subnet_main["appgw"].id
   }
   frontend_ip_configuration {
     name                 = "public"

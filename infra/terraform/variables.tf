@@ -327,11 +327,25 @@ variable "log_retention_days" {
   type = number
 }
 
+variable "apim_sku" {
+  description = "APIM tier: BasicV2 (default) or Developer (non-production, no SLA, capacity must be 1)."
+  type        = string
+  default     = "BasicV2"
+  validation {
+    condition     = contains(["BasicV2", "Developer"], var.apim_sku)
+    error_message = "apim_sku must be BasicV2 or Developer."
+  }
+}
+
 variable "apim_capacity" {
   type = number
   validation {
     condition     = var.apim_capacity >= 1 && var.apim_capacity <= 10 && floor(var.apim_capacity) == var.apim_capacity
-    error_message = "Basic v2 capacity must be an integer from 1 to 10; quota/region still need validation."
+    error_message = "Capacity must be an integer from 1 to 10; Developer allows only 1. Quota/region still need validation."
+  }
+  validation {
+    condition     = var.apim_sku != "Developer" || var.apim_capacity == 1
+    error_message = "Developer tier supports capacity 1 only."
   }
 }
 

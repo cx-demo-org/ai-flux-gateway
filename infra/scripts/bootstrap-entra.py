@@ -1,14 +1,15 @@
 """Idempotent dedicated dev registrations. Uses the signed-in CLI identity, never secrets."""
 
 import json
+import os
 import subprocess
 import uuid
 from pathlib import Path
 
-PREFIX = "aiflux-fdpo-dev"
-HOST = "https://aiflux-gateway-dev.eastus.cloudapp.azure.com"
-TENANT = "16b3c013-d300-468d-ac64-7eda0820b6d3"
-BOOTSTRAP = "958ce003-57f5-434f-b107-ca31266a7b08"
+PREFIX = os.environ.get("AIFLUX_PREFIX", "aiflux-fdpo-dev")
+HOST = os.environ.get("AIFLUX_HOST", "https://aiflux-gateway-dev.eastus.cloudapp.azure.com")
+TENANT = os.environ.get("AIFLUX_TENANT_ID", "16b3c013-d300-468d-ac64-7eda0820b6d3")
+BOOTSTRAP = os.environ.get("AIFLUX_BOOTSTRAP_OBJECT_ID", "958ce003-57f5-434f-b107-ca31266a7b08")
 
 
 def az(*args):

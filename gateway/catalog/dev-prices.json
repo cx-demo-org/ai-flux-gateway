@@ -1,33 +1,8 @@
 [
   {
-    "model": "gpt-5.6-luna", "provider": "OpenAI", "region": "eastus",
+    "model": "gpt-5-nano", "provider": "OpenAI", "region": "southeastasia",
     "effective_from": "2026-10-12T16:30:00Z", "currency": "USD",
-    "input_per_million": "0.20", "output_per_million": "1.20",
-    "cached_input_per_million": "0.02", "input_includes_cached": true
-  },
-  {
-    "model": "gpt-5.6-luna", "provider": "OpenAI", "region": "swedencentral",
-    "effective_from": "2026-10-12T16:30:00Z", "currency": "USD",
-    "input_per_million": "0.20", "output_per_million": "1.20",
-    "cached_input_per_million": "0.02", "input_includes_cached": true
-  },
-  {
-    "model": "gpt-5.6-sol", "provider": "OpenAI", "region": "eastus",
-    "effective_from": "2026-10-12T16:30:00Z", "currency": "USD",
-    "input_per_million": "4.00", "output_per_million": "20.00",
-    "cached_input_per_million": "0.40", "input_includes_cached": true
-  },
-  {
-    "model": "gpt-5.6-sol", "provider": "OpenAI", "region": "swedencentral",
-    "effective_from": "2026-10-12T16:30:00Z", "currency": "USD",
-    "input_per_million": "4.00", "output_per_million": "20.00",
-    "cached_input_per_million": "0.40", "input_includes_cached": true
-  },
-  {
-    "model": "claude-haiku-5-5", "provider": "Anthropic", "region": "eastus",
-    "effective_from": "2026-10-12T16:30:00Z", "currency": "USD",
-    "input_per_million": "0.10", "output_per_million": "0.50",
-    "cached_input_per_million": "0.01", "cache_write_per_million": "0.125",
-    "input_includes_cached": false
+    "input_per_million": "0.05", "output_per_million": "0.40",
+    "cached_input_per_million": "0.005", "input_includes_cached": true
   }
 ]

@@ -1,26 +1,10 @@
 {
   "models": [
     {
-      "id": "gpt-5.6-luna", "provider": "OpenAI", "backend_model": "gpt-5.6-luna",
+      "id": "gpt-5-nano", "provider": "OpenAI", "backend_model": "gpt-5-nano",
       "capabilities": ["chat"], "enabled": true, "max_completion_tokens": 100000,
       "backends": [
-        {"id": "dev-gpt-5-6-luna-eastus", "region": "eastus", "url": "https://aiflux-fdpo-dev-foundry.openai.azure.com/openai/v1", "api_format": "openai-chat-completions", "priority": 1, "weight": 1, "auth": {"managed_identity_resource": "https://cognitiveservices.azure.com/"}},
-        {"id": "dev-gpt-5-6-luna-swedencentral", "region": "swedencentral", "url": "https://aiflux-fdpo-dev-foundry-swc.openai.azure.com/openai/v1", "api_format": "openai-chat-completions", "priority": 1, "weight": 1, "auth": {"managed_identity_resource": "https://cognitiveservices.azure.com/"}}
-      ]
-    },
-    {
-      "id": "gpt-5.6-sol", "provider": "OpenAI", "backend_model": "gpt-5.6-sol",
-      "capabilities": ["chat"], "enabled": true, "max_completion_tokens": 100000,
-      "backends": [
-        {"id": "dev-gpt-5-6-sol-eastus", "region": "eastus", "url": "https://aiflux-fdpo-dev-foundry.openai.azure.com/openai/v1", "api_format": "openai-chat-completions", "priority": 1, "weight": 1, "auth": {"managed_identity_resource": "https://cognitiveservices.azure.com/"}},
-        {"id": "dev-gpt-5-6-sol-swedencentral", "region": "swedencentral", "url": "https://aiflux-fdpo-dev-foundry-swc.openai.azure.com/openai/v1", "api_format": "openai-chat-completions", "priority": 1, "weight": 1, "auth": {"managed_identity_resource": "https://cognitiveservices.azure.com/"}}
-      ]
-    },
-    {
-      "id": "claude-haiku-5-5", "provider": "Anthropic", "backend_model": "claude-haiku-5-5",
-      "capabilities": ["chat"], "enabled": true, "max_completion_tokens": 100000,
-      "backends": [
-        {"id": "dev-claude-haiku-5-5-eastus", "region": "eastus", "url": "https://aiflux-fdpo-dev-foundry.services.ai.azure.com/anthropic/v1", "api_format": "anthropic-messages", "priority": 1, "weight": 1, "auth": {"managed_identity_resource": "https://cognitiveservices.azure.com/"}}
+        {"id": "dev-gpt-5-nano-southeastasia", "region": "southeastasia", "url": "https://aiflux-dev-sea-foundry.openai.azure.com/openai/v1", "api_format": "openai-chat-completions", "priority": 1, "weight": 1, "auth": {"managed_identity_resource": "https://cognitiveservices.azure.com/"}}
       ]
     },
     {"id": "gpt-6-astra", "provider": "OpenAI", "backend_model": "", "capabilities": [], "enabled": false, "placeholder": true},

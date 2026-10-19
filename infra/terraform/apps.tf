@@ -3,18 +3,18 @@ locals {
   database_url               = local.platform_stage ? "mssql+pyodbc://@${azurerm_mssql_server.main[0].fully_qualified_domain_name}:1433/${azurerm_mssql_database.main[0].name}?driver=ODBC+Driver+18+for+SQL+Server&Encrypt=yes&TrustServerCertificate=no" : ""
   gateway_url                = var.dev_direct_portals_enabled ? "https://${local.apim_name}.azure-api.net/dev/llm/v1" : (local.public_edge_stage ? "https://${var.edge.origin_hostname}/v1" : (local.platform_stage ? "https://${var.gateway_origin_hostname}/v1" : ""))
   control_settings = local.platform_stage ? merge({
-    AIFLUX_ENVIRONMENT            = "production"
-    AIFLUX_DATABASE_URL           = local.database_url
-    AIFLUX_ENTRA_AUDIENCE         = var.entra.audience
-    AIFLUX_ENTRA_CLIENT_ID        = var.entra.client_id
-    AIFLUX_HOME_TENANT_ID         = var.entra.home_tenant_id
-    AIFLUX_BOOTSTRAP_OBJECT_ID    = var.entra.bootstrap_object_id
-    AIFLUX_GATEWAY_URL            = local.gateway_url
-    AIFLUX_APIM_RESOURCE_ID       = azurerm_api_management.main.id
-    AIFLUX_APIM_PRODUCT_ID        = var.dev_direct_portals_enabled ? azurerm_api_management_product.dev_unified[0].product_id : azurerm_api_management_product.main.product_id
-    AIFLUX_LOG_WORKSPACE_ID       = azurerm_log_analytics_workspace.main.workspace_id
-    AIFLUX_CATALOG_PATH           = var.dev_direct_portals_enabled ? "/app/gateway/catalog/dev-models.json" : var.catalog_container_path
-    AIFLUX_CATALOG_CONFIGURED     = tostring(var.dev_catalog_accepted)
+    AIFLUX_ENVIRONMENT              = "production"
+    AIFLUX_DATABASE_URL             = local.database_url
+    AIFLUX_ENTRA_AUDIENCE           = var.entra.audience
+    AIFLUX_ENTRA_CLIENT_ID          = var.entra.client_id
+    AIFLUX_HOME_TENANT_ID           = var.entra.home_tenant_id
+    AIFLUX_BOOTSTRAP_OBJECT_ID      = var.entra.bootstrap_object_id
+    AIFLUX_GATEWAY_URL              = local.gateway_url
+    AIFLUX_APIM_RESOURCE_ID         = azurerm_api_management.main.id
+    AIFLUX_APIM_PRODUCT_ID          = var.dev_direct_portals_enabled ? azurerm_api_management_product.dev_unified[0].product_id : azurerm_api_management_product.main.product_id
+    AIFLUX_LOG_WORKSPACE_ID         = azurerm_log_analytics_workspace.main.workspace_id
+    AIFLUX_CATALOG_PATH             = var.dev_direct_portals_enabled ? "/app/gateway/catalog/dev-models.json" : var.catalog_container_path
+    AIFLUX_CATALOG_CONFIGURED       = tostring(var.dev_catalog_accepted)
     AIFLUX_CORS_ORIGINS             = jsonencode(var.dev_direct_portals_enabled ? distinct(concat(var.dev_portal_origins, ["https://${var.gateway_origin_hostname}"])) : [])
     AIFLUX_ACME_CHALLENGE_ENABLED   = tostring(var.acme_http01_enabled)
     AIFLUX_MISE_VALIDATION_ENDPOINT = var.mise_sidecar_enabled ? "http://127.0.0.1:8081/Validate" : ""
@@ -74,11 +74,14 @@ resource "azurerm_linux_web_app" "main" {
         ip_address = "${scm_ip_restriction.value}/32"
       }
     }
-    ip_restriction {
-      name                      = "application-gateway"
-      priority                  = 100
-      action                    = "Allow"
-      virtual_network_subnet_id = azurerm_subnet.main["appgw"].id
+    dynamic "ip_restriction" {
+      for_each = local.edge_stage ? [true] : []
+      content {
+        name                      = "application-gateway"
+        priority                  = 100
+        action                    = "Allow"
+        virtual_network_subnet_id = azapi_resource.subnet_main["appgw"].id
+      }
     }
     ip_restriction {
       name       = "reviewed-operator"

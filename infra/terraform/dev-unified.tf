@@ -1,13 +1,5 @@
 locals {
-  dev_unified_aliases = concat(sort(tolist(local.dev_aliases)), ["claude-haiku-5-5"])
-}
-
-data "azapi_resource" "dev_haiku" {
-  count                  = var.dev_unified_inference_enabled ? 1 : 0
-  type                   = "Microsoft.CognitiveServices/accounts/deployments@2025-06-01"
-  parent_id              = azapi_resource.ai["language"].id
-  name                   = "claude-haiku-5-5"
-  response_export_values = ["properties"]
+  dev_unified_aliases = sort(tolist(local.dev_aliases))
 }
 
 resource "azurerm_api_management_api" "dev_unified" {
@@ -58,27 +50,6 @@ resource "azurerm_api_management_product_api" "dev_unified" {
   resource_group_name = local.rg
 }
 
-resource "azapi_resource" "dev_anthropic_backend" {
-  count     = var.dev_unified_inference_enabled ? 1 : 0
-  type      = "Microsoft.ApiManagement/service/backends@2024-05-01"
-  parent_id = azurerm_api_management.main.id
-  name      = "dev-claude-haiku-5-5-eastus"
-  body = {
-    properties = {
-      protocol    = "http"
-      url         = "https://${local.prefix}-foundry.services.ai.azure.com/anthropic/v1"
-      description = "Explicit text-only Anthropic Messages adapter; gateway UAMI authentication is applied by policy."
-      tls         = { validateCertificateChain = true, validateCertificateName = true }
-    }
-  }
-  lifecycle {
-    precondition {
-      condition     = data.azapi_resource.dev_haiku[0].output.properties.provisioningState == "Succeeded" && data.azapi_resource.dev_haiku[0].output.properties.model.name == "claude-haiku-5-5"
-      error_message = "The guarded adapter requires the real succeeded Haiku 5.5 deployment in the primary Foundry account."
-    }
-  }
-}
-
 resource "azapi_resource" "dev_unified_policy" {
   count     = var.dev_unified_inference_enabled ? 1 : 0
   type      = "Microsoft.ApiManagement/service/apis/policies@2022-08-01"
@@ -102,5 +73,5 @@ resource "azapi_resource" "dev_unified_policy" {
       })
     }
   }
-  depends_on = [azapi_resource.dev_anthropic_backend, azapi_resource.dev_model_pool, azapi_resource.dev_content_safety_backend]
+  depends_on = [azapi_resource.dev_model_pool, azapi_resource.dev_content_safety_backend]
 }
