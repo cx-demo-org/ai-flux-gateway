@@ -2,6 +2,31 @@
 
 This guide describes the modified single-tenant, single-model **development** deployment in this repository. It is not a production deployment certification. Read the limitations and acceptance checks before provisioning customer resources.
 
+## Customer infrastructure-only quick start (authentication deferred)
+
+The approved customer foundation inputs are now in `infra/terraform/environments/customer-foundation.tfvars.example`:
+
+- Subscription: `aa28274d-fea0-46d4-b9c8-30f3ef0a0e52`.
+- Existing resource group: `IDS-TOKEN-EXCHANGE-POC`; this stack does not create or take ownership of the resource group.
+- Region: `southeastasia`; prefix: `proj-ids-poc`; contact: `daniel.anthony@singtel.com`.
+- APIM Developer, ACR, monitoring, gateway identity, Key Vault and AI protection accounts; inference disabled.
+
+From customer Azure Cloud Shell **Bash**, after signing in and verifying persistent storage and Terraform 1.16.x:
+
+```bash
+git clone https://github.com/cx-demo-org/ai-flux-gateway.git
+cd ai-flux-gateway
+bash infra/scripts/deploy-customer-foundation.sh
+```
+
+If already cloned, pull the latest code before running the script. It reads the provided foundation inputs directly, validates the live subscription and provider registrations, displays the actual tenant, asks for cost/configuration approval, creates a plan and asks before applying. It does not create Entra registrations or require application client IDs. The first deployment may hit the default APIM policy conflict: the script offers to import the policy only for an APIM already in its own state, then stops; rerun with the same state directory to plan the remainder.
+
+**Scope:** this stage does not deploy the portals/API, SQL, VNet/private endpoints, model or ingestion runtime. Private data intent is retained in the inputs, with SQL/storage/Key Vault public access disabled; Key Vault is provisioned public-disabled without a private endpoint at this stage. SQL and private networking require the later prerequisites/platform stages and the outstanding SQL administrator/private-runner decisions. Do not interpret foundation success as a working application.
+
+**State:** because access/network/container approval for existing account `projpoctokenex` is still unconfirmed, this script leaves it untouched and uses protected persistent local state under `$HOME/clouddrive/aiflux/proj-ids-poc`. It requires explicit persistence/backup confirmation and refuses a missing default clouddrive or temporary directory. To use another verified persistent directory, set `AIFLUX_STATE_DIR` to its absolute path before running. Never use a new empty state directory for an existing deployment. Before a sustained customer deployment, agree on the reviewed remote backend and migrate this state; do not create a second independent state or manually upload state as a substitute for a backend.
+
+The requested CIDRs are placeholders for later stages, not verified customer allocations. Existing Foundry resources are not imported or modified. Name collisions or existing AIFLUX state must be reconciled before any apply; never adopt unrelated resources merely to make deployment succeed.
+
 ## Scope and current limitations
 
 - Main Terraform root: `infra/terraform`. Stages progress from `apim` to `platform`. Edge stages are outside this guide.

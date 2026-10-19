@@ -1,0 +1,44 @@
+subscription_id     = "aa28274d-fea0-46d4-b9c8-30f3ef0a0e52"
+resource_group_name = "IDS-TOKEN-EXCHANGE-POC"
+location            = "southeastasia"
+sql_location        = "southeastasia"
+name_prefix         = "proj-ids-poc"
+publisher_email     = "daniel.anthony@singtel.com"
+
+deployment_stage          = "apim"
+deployment_approved       = false
+apim_sku                  = "Developer"
+apim_capacity             = 1
+log_retention_days        = 30
+create_container_registry = true
+app_service_sku           = "B1"
+sql_sku                   = "S0"
+
+# Private endpoints and SQL are deferred until the prerequisites stage.
+sql_enabled                                    = true
+hybrid_private_data_enabled                    = true
+sql_public_network_access_enabled              = false
+key_vault_public_network_access_enabled         = false
+function_storage_public_network_access_enabled = false
+private_sql_connectivity_accepted              = false
+
+network = {
+  address_space                  = "10.240.0.0/16"
+  app_gateway_subnet             = "10.240.1.0/24"
+  private_endpoint_subnet        = "10.240.3.0/24"
+  app_service_integration_subnet = "10.240.4.0/24"
+}
+
+dev_openai_inference_enabled        = false
+dev_unified_inference_enabled       = false
+dev_direct_portals_enabled          = false
+dev_catalog_accepted                = false
+dev_price_bootstrap_enabled         = false
+ingestion_enabled                  = false
+ingestion_timer_enabled            = false
+public_edge_live_gates_approved     = false
+
+tags = {
+  environment = "poc"
+  workload    = "aiflux"
+}
